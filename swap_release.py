@@ -37,7 +37,7 @@ def get_media_server_data(data_type="swap", media_server=None):
 	result = media_server_data.split('\n')[3].split()[3]
 	print(f"result = {result}")
 	exec_vars = {}
-	exec(data_processing_command, globals(), exec_vars)
+	exec(data_processing_command, locals(), exec_vars)
 
 	return exec_vars["var"]
 
