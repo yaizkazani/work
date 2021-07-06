@@ -32,7 +32,8 @@ def get_media_server_data(data_type="swap", media_server=None):
 		media_server_data = 0
 
 	data_processing_command = {"swap": r"var = media_server_data.split('\n')[3].split()[3]"}.get(data_type,
-	                                                                                      f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
+	                                                                                             f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
+	logging.info(f"data_processing_command = {data_processing_command}")
 	exec_vars = {}
 	exec(data_processing_command, globals(), exec_vars)
 
