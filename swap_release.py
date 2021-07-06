@@ -1,4 +1,4 @@
-import os, time, subprocess, pathlib, sys, logging
+import os, time, subprocess, pathlib, sys, logging, re
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s -%(levelname)s -%(message)s')
 
@@ -10,6 +10,7 @@ class Media_server():
 		self.name = name
 		self.free_swap_space = 101
 		self.low_swap_condition = False
+		self.running_backups_condition = True
 
 	def check_server_status(self):
 		server_name = self.name
@@ -23,6 +24,8 @@ class Media_server():
 
 		if self.free_swap_space < 100:
 			self.low_swap_condition = True
+
+	# Checking if backups are running
 
 
 def get_media_server_list():
@@ -46,7 +49,7 @@ def get_media_server_data(data_type="swap", media_server=None):
 	data_type_command = {"swap": "free -m"}.get(data_type, None)
 	try:
 		getoutput_command = fr"ssh root@{media_server} {data_type_command}"
-		logging.info(f"getoutput_command = {getoutput_command}")
+		logging.info(f"get data: getoutput_command = {getoutput_command}")
 		media_server_data = subprocess.getoutput(getoutput_command)
 
 	except Exception as e:
@@ -62,6 +65,24 @@ def get_media_server_data(data_type="swap", media_server=None):
 	return int(exec_vars["var"])
 
 
+def check_running_backups(media_server=None):
+	if not media_server:
+		logging.error("from: get_media_server_data()\nMedia server is not specified")
+		return None
+
+	try:
+		linux_command = r"eval $(locate bpps | sed -n '2 p') -a"
+		getoutput_command = fr"ssh root@{media_server} {linux_command}"
+		logging.info(f"check backups: getoutput_command = {getoutput_command}")
+		running_backups_raw = subprocess.getoutput(getoutput_command)
+
+	except Exception as e:
+		logging.error(f"from: check_running_backups()\nError while connecting to media server {media_server}, Error: {e}")
+		running_backups_raw = True
+
+	return True if re.search(r"\s-backup\s", running_backups_raw) else False
+
+
 media_server_names = get_media_server_list()
 media_servers = []
 
@@ -69,4 +90,6 @@ media_servers = []
 
 for media_server_exemplar in media_servers:
 	media_server_exemplar.check_server_status()
-	print(f"Media server name = {media_server_exemplar.name}\nMedia server free swap = {media_server_exemplar.free_swap_space}")
+	print(f"Media server name = {media_server_exemplar.name}\n"
+	      f"Media server free swap = {media_server_exemplar.free_swap_space}\n"
+	      f"Media server backups status = {media_server_exemplar.running_backups_condition}")
