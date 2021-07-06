@@ -31,9 +31,12 @@ def get_media_server_data(data_type="swap", media_server=None):
 		logging.error(f"from: get_media_server_data()\nError occured while connecting to media server {media_server}, Error: {e}")
 		media_server_data = 0
 
-	data_processing_command = {"swap": "media_server_data.split('\n')[3].split()[3]"}.get(data_type,
+	data_processing_command = {"swap": r"var = media_server_data.split('\n')[3].split()[3]"}.get(data_type,
 	                                                                                      f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
-	return exec(data_processing_command)
+	exec_vars = {}
+	exec(data_processing_command, exec_vars)
+
+	return exec_vars["var"]
 
 
 print(get_media_server_data(data_type="swap", media_server=get_media_server_list()[0]))
