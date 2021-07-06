@@ -24,7 +24,7 @@ class Media_server():
 
 		self.free_swap_space = get_media_server_data(data_type="swap", media_server=server_name)
 
-		if 0 <= self.free_swap_space < 100:
+		if 0 <= self.free_swap_space < 300:
 			self.low_swap_condition = True
 		elif self.free_swap_space < 0:
 			logging.error(f"Error detected while getting parameters for media server: \n\tMedia server name: {self.name}, parameter: free_swap_space")
@@ -32,6 +32,9 @@ class Media_server():
 		# Checking if backups are running
 
 		self.running_backups_condition = check_running_backups(server_name)
+
+	def release_swap(self) -> None:
+		pass
 
 
 def get_media_server_list() -> list:
@@ -102,3 +105,15 @@ for media_server_exemplar in media_servers:
 	      f"Media server free swap = {media_server_exemplar.free_swap_space}\n"
 	      f"Media server running backups condition = {media_server_exemplar.running_backups_condition}\n"
 	      f"Media server low swap condition = {media_server_exemplar.low_swap_condition}")
+	if media_server_exemplar.low_swap_condition and not media_server_exemplar.running_backups_condition:
+		media_server_exemplar.release_swap()
+
+#TODO
+# 1. Add Logging: a) Write log each time we check media server conditions
+#                 b) Each day if there are < than 1.5h until midnight - run daily report: read all previous report files, zip them, move to archive folder
+#				  c) Email daily report after b)
+#                 d) Each 1st day of the month delete old archives - keep for 3 months
+# 2. Add swap release: a) Run ssh root@media1 "service netbackup stop && swapoff -a && swapon -a && service netbackup start
+#					   b) Check if services are running, add new condition - services_running
+#                      c) If services are not running - start them again, check again if won't start - email an alert to the team
+#
