@@ -59,7 +59,7 @@ def get_media_server_data(data_type="swap", media_server=None):
 	exec_vars = {}
 	exec(data_processing_command, locals(), exec_vars)
 
-	return exec_vars["var"]
+	return int(exec_vars["var"])
 
 
 media_server_names = get_media_server_list()
