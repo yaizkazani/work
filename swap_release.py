@@ -19,9 +19,9 @@ class Media_server():
 
 		# Getting swap data from server
 
-		free_swap_space = get_media_server_data(data_type="swap", media_server=server_name)
+		self.free_swap_space = get_media_server_data(data_type="swap", media_server=server_name)
 
-		if free_swap_space < 100:
+		if self.free_swap_space < 100:
 			self.low_swap_condition = True
 
 
