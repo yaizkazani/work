@@ -10,20 +10,30 @@ def get_media_server_list():
 		logging.critical("from: get_media_server_list()\nMedia server list is empty")
 	return filtered_media_server_list
 
-def get_media_server_data(type="swap", media_server=None):
+
+def get_media_server_data(data_type="swap", media_server=None):
+	possible_data_types = ["swap"]  # ! add data types here
+
 	if not media_server:
 		logging.error("from: get_media_server_data()\nMedia server is not specified")
+		return None
+	elif data_type not in possible_data_types:
+		logging.error(f"from: get_media_server_data()\nIncorrect type argument: {data_type}")
+		return None
 
-	data_type_command = {"swap": "free -m"}.get(type, f"echo 'incorrect command provided: {type}' >> /root/Peter_swap_script_command_error.log")
+	data_type_command = {"swap": "free -m"}.get(data_type, None)
 	try:
 		getoutput_command = fr"ssh root@{media_server} {data_type_command}"
 		logging.info(f"getoutput_command = {getoutput_command}")
 		media_server_data = subprocess.getoutput(getoutput_command)
-		return media_server_data
 
 	except Exception as e:
 		logging.error(f"from: get_media_server_data()\nError occured while connecting to media server {media_server}, Error: {e}")
+		media_server_data = 0
+
+	data_processing_command = {"swap": "media_server_data.split('\n')[3].split()[3]"}.get(data_type,
+	                                                                                      f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
+	return exec(data_processing_command)
 
 
-print(get_media_server_data(type="swap", media_server=get_media_server_list()[0]))
-
+print(get_media_server_data(data_type="swap", media_server=get_media_server_list()[0]))
