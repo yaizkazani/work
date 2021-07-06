@@ -25,7 +25,9 @@ class Media_server():
 		if self.free_swap_space < 100:
 			self.low_swap_condition = True
 
-	# Checking if backups are running
+		# Checking if backups are running
+
+		self.running_backups_condition = check_running_backups(server_name)
 
 
 def get_media_server_list():
