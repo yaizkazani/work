@@ -14,9 +14,11 @@ def get_media_server_data(type="swap", media_server=None):
 	if not media_server:
 		logging.error("from: get_media_server_data()\nMedia server is not specified")
 
-	command = {"swap": "free -m"}.get(type, f"echo 'incorrect command provided: {type}' >> /root/Peter_swap_script_command_error.log")
+	data_type_command = {"swap": "free -m"}.get(type, f"echo 'incorrect command provided: {type}' >> /root/Peter_swap_script_command_error.log")
 	try:
-		media_server_data = subprocess.getoutput(fr"ssh root@{media_server} {command}")
+		getoutput_command = fr"ssh root@{media_server} {data_type_command}"
+		logging.info(f"getoutput_command = {getoutput_command}")
+		media_server_data = subprocess.getoutput(getoutput_command)
 
 	except Exception as e:
 		logging.error(f"from: get_media_server_data()\nError occured while connecting to media server {media_server}, Error: {e}")
