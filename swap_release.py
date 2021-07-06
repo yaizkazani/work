@@ -19,6 +19,7 @@ def get_media_server_data(type="swap", media_server=None):
 		getoutput_command = fr"ssh root@{media_server} {data_type_command}"
 		logging.info(f"getoutput_command = {getoutput_command}")
 		media_server_data = subprocess.getoutput(getoutput_command)
+		return media_server_data
 
 	except Exception as e:
 		logging.error(f"from: get_media_server_data()\nError occured while connecting to media server {media_server}, Error: {e}")
