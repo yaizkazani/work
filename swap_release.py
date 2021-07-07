@@ -95,7 +95,7 @@ class Media_server():
 				if not re.search(f"/{process}", nb_processes):
 					missing_nb_processes.append(process)
 		self.netbackup_processes_running = True if not missing_nb_processes else False
-		return missing_nb_processes if not missing_nb_processes else "No missing processes found!"
+		return missing_nb_processes if missing_nb_processes else "No missing processes found!"
 
 
 def get_media_server_list() -> list:
