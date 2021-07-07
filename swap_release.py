@@ -85,13 +85,13 @@ class Media_server():
 
 		missing_nb_processes = []
 
-		for process in nb_processes:
-			if process not in general_nb_processes:
+		for process in general_nb_processes:
+			if process not in nb_processes:
 				missing_nb_processes.append(process)
 		self.msdp_server = media_servers_with_MSDP[server_name.split(".")[0]]
 
 		if self.msdp_server:
-			for process in nb_processes:
+			for process in general_nb_processes:
 				if process not in nb_msdp_processes:
 					missing_nb_processes.append(process)
 		self.netbackup_processes_running = True if not missing_nb_processes else False
