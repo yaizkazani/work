@@ -34,7 +34,7 @@ class Media_server():
 		self.free_swap_space = 101
 		self.low_swap_condition = False
 		self.running_backups_condition = True
-		self.msdp_server = media_servers_with_MSDP[self.name.split["."][0]]
+		self.msdp_server = media_servers_with_MSDP[self.name.split(".")[0]]
 		self.netbackup_processes_running = False
 
 	def check_server_status(self) -> None:
@@ -78,6 +78,7 @@ class Media_server():
 			return None
 		try:
 			nb_processes = subprocess.getoutput(f"ssh root@{server_name} $eval (locate bpps | sed -n '2 p') -a")
+			print(nb_processes)
 		except Exception as e:
 			logging.error(f"from: release_swap()\n{e}")
 			return None
@@ -87,7 +88,7 @@ class Media_server():
 		for process in nb_processes:
 			if process not in general_nb_processes:
 				missing_nb_processes.append(process)
-		self.msdp_server = media_servers_with_MSDP[server_name.split["."][0]]
+		self.msdp_server = media_servers_with_MSDP[server_name.split(".")[0]]
 
 		if self.msdp_server:
 			for process in nb_processes:
