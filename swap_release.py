@@ -93,7 +93,9 @@ class Media_server():
 			for process in nb_msdp_processes:
 				if not re.search(f"/{process}", nb_processes):
 					missing_nb_processes.append(process)
-		self.netbackup_processes_running = True if not missing_nb_processes else False
+		if missing_nb_processes:
+			logging.info(f"from: check_netbackup_processes, missing processes found, attempting restart of: {missing_nb_processes}")
+			self.restart_netbackup_services()
 		return missing_nb_processes if missing_nb_processes else "No missing processes found!"
 
 	def get_media_server_data(self, data_type="swap") -> [int, None]:
