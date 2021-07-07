@@ -47,7 +47,7 @@ class Media_server():
 
 		self.free_swap_space = self.get_media_server_data()
 
-		if 0 <= self.free_swap_space < 1300:
+		if 0 <= self.free_swap_space < 2300:
 			self.low_swap_condition = True
 		elif self.free_swap_space < 0:
 			logging.error(f"Error detected while getting parameters for media server: \n\tMedia server name: {self.name}, parameter: free_swap_space")
@@ -94,8 +94,8 @@ class Media_server():
 				if not re.search(f"/{process}", nb_processes):
 					missing_nb_processes.append(process)
 		if missing_nb_processes:
-			logging.info(f"from: check_netbackup_processes, missing processes found, attempting restart of: {missing_nb_processes}")
-			self.restart_netbackup_services()
+			logging.info(f"from: check_netbackup_processes, missing processes found: {missing_nb_processes}, attempting restart of services ")
+			self.start_netbackup_services()
 		return missing_nb_processes if missing_nb_processes else "No missing processes found!"
 
 	def get_media_server_data(self, data_type="swap") -> [int, None]:
@@ -145,17 +145,17 @@ class Media_server():
 
 		return True if re.search(r"\s-backup\s", running_backups_raw) else False
 
-	def restart_netbackup_services(self):
+	def start_netbackup_services(self):
 		server_name = self.name
 		if not server_name:
-			logging.error("from: restart_netbackup_services()\nMedia server name is not specified")
+			logging.error("from: start_netbackup_services()\nMedia server name is not specified")
 			return None
 
 		try:
-			subprocess.getoutput(f"ssh root@{server_name} service netbackup stop && service netbackup start")
-			print(f"Netbackup services restarted on {server_name}")
+			subprocess.getoutput(f"ssh root@{server_name} service netbackup start")
+			print(f"Netbackup services started on {server_name}")
 		except Exception as e:
-			logging.error(f"from: restart_netbackup_services()\n{e}")
+			logging.error(f"from: start_netbackup_services()\n{e}")
 			return None
 
 
