@@ -77,7 +77,7 @@ class Media_server():
 			logging.error("from: check_netbackup_processes()\nMedia server name is not specified")
 			return None
 		try:
-			nb_processes = subprocess.getoutput(f"ssh root@{server_name} $eval (locate bpps | sed -n '2 p') -a")
+			nb_processes = subprocess.getoutput(f"ssh root@{server_name} eval $(locate bpps | sed -n '2 p') -a")
 			print(nb_processes)
 		except Exception as e:
 			logging.error(f"from: release_swap()\n{e}")
