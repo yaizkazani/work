@@ -46,7 +46,7 @@ class Media_server():
 
 		# Getting swap data from server
 
-		self.free_swap_space = get_media_server_data(data_type="swap", media_server=server_name)
+		self.free_swap_space = self.get_media_server_data()
 
 		if 0 <= self.free_swap_space < 300:
 			self.low_swap_condition = True
@@ -55,7 +55,7 @@ class Media_server():
 
 		# Checking if backups are running
 
-		self.running_backups_condition = check_running_backups(server_name)
+		self.running_backups_condition = self.check_running_backups()
 
 	def release_swap(self) -> [None, str]:
 		"""Connect to server, stop Netbackup services, disable-enable swap, start Netbackup services"""
