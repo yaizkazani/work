@@ -80,7 +80,7 @@ class Media_server():
 			nb_processes = subprocess.getoutput(f"ssh root@{server_name} eval $(locate bpps | sed -n '2 p') -a")
 			print(f"Got processes from {server_name}")
 		except Exception as e:
-			logging.error(f"from: release_swap()\n{e}")
+			logging.error(f"from: check_netbackup_processes()\n{e}")
 			return None
 
 		missing_nb_processes = []
@@ -97,6 +97,53 @@ class Media_server():
 		self.netbackup_processes_running = True if not missing_nb_processes else False
 		return missing_nb_processes if missing_nb_processes else "No missing processes found!"
 
+	def get_media_server_data(self, data_type="swap") -> [int, None]:
+		"""connect to server, get free swap amount and return as int MB"""
+		possible_data_types = ["swap"]  # ! add data types here
+		media_server = self.name
+		if not media_server:
+			logging.error("from: get_media_server_data()\nMedia server is not specified")
+			return None
+		elif data_type not in possible_data_types:
+			logging.error(f"from: get_media_server_data()\nIncorrect type argument: {data_type}")
+			return None
+
+		data_type_command = {"swap": "free -m"}.get(data_type, None)
+		try:
+			getoutput_command = fr"ssh root@{media_server} {data_type_command}"
+			logging.info(f"get data: getoutput_command = {getoutput_command}")
+			media_server_data = subprocess.getoutput(getoutput_command)
+
+		except Exception as e:
+			logging.error(f"from: get_media_server_data()\nError while connecting to media server {media_server}, Error: {e}")
+			return -1
+
+		data_processing_command = {"swap": r"var = media_server_data.split('\n')[3].split()[3]"}.get(data_type,
+		                                                                                             f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
+		logging.info(f"data_processing_command = {data_processing_command}")
+		exec_vars = {}
+		exec(data_processing_command, locals(), exec_vars)
+
+		return int(exec_vars["var"])
+
+	def check_running_backups(self):
+		server_name = self.name
+		if not server_name:
+			logging.error("from: check_running_backups()\nMedia server name is not specified")
+			return None
+
+		try:
+			linux_command = r"eval $(locate bpps | sed -n '2 p') -a"
+			getoutput_command = fr"ssh root@{server_name} {linux_command}"
+			logging.info(f"check backups: getoutput_command = {getoutput_command}")
+			running_backups_raw = subprocess.getoutput(getoutput_command)
+
+		except Exception as e:
+			logging.error(f"from: check_running_backups()\nError while connecting to media server {server_name}, Error: {e}")
+			running_backups_raw = True
+
+		return True if re.search(r"\s-backup\s", running_backups_raw) else False
+
 
 def get_media_server_list() -> list:
 	"""Read bp.conf, extract media server list, filter it and return as list"""
@@ -104,57 +151,8 @@ def get_media_server_list() -> list:
 	filtered_media_server_list = [item.split("=")[1].strip() for item in media_server_list.split("\n") if "MEDIA_SERVER" in item]
 	if not filtered_media_server_list:
 		logging.critical("from: get_media_server_list()\nMedia server list is empty")
-		raise ValueError("get_media_server_list: No media servers found")
+		raise ValueError("from: get_media_server_list: No media servers found")
 	return filtered_media_server_list
-
-
-def get_media_server_data(data_type="swap", media_server=None) -> [int, None]:
-	"""connect to server, get free swap amount and return as int MB"""
-	possible_data_types = ["swap"]  # ! add data types here
-
-	if not media_server:
-		logging.error("from: get_media_server_data()\nMedia server is not specified")
-		return -1
-	elif data_type not in possible_data_types:
-		logging.error(f"from: get_media_server_data()\nIncorrect type argument: {data_type}")
-		return -1
-
-	data_type_command = {"swap": "free -m"}.get(data_type, None)
-	try:
-		getoutput_command = fr"ssh root@{media_server} {data_type_command}"
-		logging.info(f"get data: getoutput_command = {getoutput_command}")
-		media_server_data = subprocess.getoutput(getoutput_command)
-
-	except Exception as e:
-		logging.error(f"from: get_media_server_data()\nError while connecting to media server {media_server}, Error: {e}")
-		return -1
-
-	data_processing_command = {"swap": r"var = media_server_data.split('\n')[3].split()[3]"}.get(data_type,
-	                                                                                             f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
-	logging.info(f"data_processing_command = {data_processing_command}")
-	exec_vars = {}
-	exec(data_processing_command, locals(), exec_vars)
-
-	return int(exec_vars["var"])
-
-
-def check_running_backups(media_server=None):
-	if not media_server:
-		logging.error("from: get_media_server_data()\nMedia server is not specified")
-		return None
-
-	try:
-		linux_command = r"eval $(locate bpps | sed -n '2 p') -a"
-		getoutput_command = fr"ssh root@{media_server} {linux_command}"
-		logging.info(f"check backups: getoutput_command = {getoutput_command}")
-		running_backups_raw = subprocess.getoutput(getoutput_command)
-
-	except Exception as e:
-		logging.error(f"from: check_running_backups()\nError while connecting to media server {media_server}, Error: {e}")
-		running_backups_raw = True
-
-	return True if re.search(r"\s-backup\s", running_backups_raw) else False
-
 
 media_server_names = get_media_server_list()
 media_servers = []
