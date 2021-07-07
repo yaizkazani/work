@@ -48,7 +48,7 @@ class Media_server():
 
 		self.free_swap_space = self.get_media_server_data()
 
-		if 0 <= self.free_swap_space < 300:
+		if 0 <= self.free_swap_space < 1000:
 			self.low_swap_condition = True
 		elif self.free_swap_space < 0:
 			logging.error(f"Error detected while getting parameters for media server: \n\tMedia server name: {self.name}, parameter: free_swap_space")
@@ -144,6 +144,20 @@ class Media_server():
 
 		return True if re.search(r"\s-backup\s", running_backups_raw) else False
 
+	def restart_netbackup_services(self):
+		server_name = self.name
+		if not server_name:
+			logging.error("from: restart_netbackup_services()\nMedia server name is not specified")
+			return None
+
+		try:
+			subprocess.getoutput(f"ssh root@{server_name} service netbackup stop && service netbackup start")
+			print(f"Netbackup services restarted on {server_name}")
+		except Exception as e:
+			logging.error(f"from: restart_netbackup_services()\n{e}")
+			return None
+
+
 
 def get_media_server_list() -> list:
 	"""Read bp.conf, extract media server list, filter it and return as list"""
@@ -165,7 +179,7 @@ for media_server_exemplar in media_servers:
 	      f"Media server free swap = {media_server_exemplar.free_swap_space}\n"
 	      f"Media server running backups condition = {media_server_exemplar.running_backups_condition}\n"
 	      f"Media server low swap condition = {media_server_exemplar.low_swap_condition}")
-	print(f"Checking Netbackup processes for {media_server_exemplar.name}, status: {media_server_exemplar.check_netbackup_processes()}")
+	print(f"Checking Netbackup processes for {media_server_exemplar.name}, status: {media_server_exemplar.netbackup_processes_running}")
 	if media_server_exemplar.low_swap_condition and not media_server_exemplar.running_backups_condition:
 		logging.warning(f"Swap release attempt done for {media_server_exemplar.name}, status: {media_server_exemplar.release_swap()}")
 		logging.warning(f"Checking Netbackup processes for {media_server_exemplar.name}, status: {media_server_exemplar.check_netbackup_processes()}")
