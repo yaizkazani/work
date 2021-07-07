@@ -35,7 +35,6 @@ class Media_server():
 		self.low_swap_condition = False
 		self.running_backups_condition = True
 		self.msdp_server = media_servers_with_MSDP[self.name.split(".")[0]]
-		self.netbackup_processes_running = False
 
 	def check_server_status(self) -> None:
 		"""Get self swap status, determine low swap and running backups conditions"""
@@ -179,7 +178,7 @@ for media_server_exemplar in media_servers:
 	      f"Media server free swap = {media_server_exemplar.free_swap_space}\n"
 	      f"Media server running backups condition = {media_server_exemplar.running_backups_condition}\n"
 	      f"Media server low swap condition = {media_server_exemplar.low_swap_condition}")
-	print(f"Checking Netbackup processes for {media_server_exemplar.name}, status: {media_server_exemplar.netbackup_processes_running}")
+	print(f"Checking Netbackup processes for {media_server_exemplar.name}, status: {media_server_exemplar.check_netbackup_processes()}")
 	if media_server_exemplar.low_swap_condition and not media_server_exemplar.running_backups_condition:
 		logging.warning(f"Swap release attempt done for {media_server_exemplar.name}, status: {media_server_exemplar.release_swap()}")
 		logging.warning(f"Checking Netbackup processes for {media_server_exemplar.name}, status: {media_server_exemplar.check_netbackup_processes()}")
