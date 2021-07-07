@@ -47,7 +47,7 @@ class Media_server():
 
 		self.free_swap_space = self.get_media_server_data()
 
-		if 0 <= self.free_swap_space < 1000:
+		if 0 <= self.free_swap_space < 1300:
 			self.low_swap_condition = True
 		elif self.free_swap_space < 0:
 			logging.error(f"Error detected while getting parameters for media server: \n\tMedia server name: {self.name}, parameter: free_swap_space")
