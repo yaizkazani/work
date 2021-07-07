@@ -78,7 +78,7 @@ class Media_server():
 			return None
 		try:
 			nb_processes = subprocess.getoutput(f"ssh root@{server_name} eval $(locate bpps | sed -n '2 p') -a")
-			print(nb_processes)
+			print(f"Got processes from {server_name}")
 		except Exception as e:
 			logging.error(f"from: release_swap()\n{e}")
 			return None
@@ -95,7 +95,7 @@ class Media_server():
 				if not re.search(f"/{process}", nb_processes):
 					missing_nb_processes.append(process)
 		self.netbackup_processes_running = True if not missing_nb_processes else False
-		return missing_nb_processes
+		return missing_nb_processes if not missing_nb_processes else "No missing processes found!"
 
 
 def get_media_server_list() -> list:
