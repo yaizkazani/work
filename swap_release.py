@@ -78,7 +78,7 @@ class Media_server():
 
 		if self.free_swap_space and 0 <= self.free_swap_space < 500:
 			self.low_swap_condition = True
-		else:
+		elif not self.free_swap_space:
 			logging.error(f"Error detected while getting parameters for media server: \n\tMedia server name: {self.name}, parameter: free_swap_space")
 
 		# note Checking if backups are running
