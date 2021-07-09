@@ -230,7 +230,7 @@ def prepare_cron_jobs() -> None:
 			job = cron.new(command=f"cd {pathlib.Path.cwd()} && {interpreter_location} {pathlib.Path.joinpath(pathlib.Path.cwd(), __file__)}",
 			               comment=cron_job_comment)  # create job
 			if "swap_release_job" in cron_job_comment:
-				job.hour.each(1)
+				job.hour.every(1)
 				job.minute.on(1)
 			job.enable()  # enable job
 			cron.write()  # close cron and write changes
