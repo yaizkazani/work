@@ -62,6 +62,7 @@ class Media_server():
 		self.free_swap_space = 101
 		self.low_swap_condition = False
 		self.running_backups_condition = True
+		self.running_restore_condition = True
 		self.msdp_server = media_servers_with_MSDP[self.name.split(".")[0]]  # get True/False from dict ↑
 		if not self.name.split(".")[0] in media_servers_with_MSDP:
 			logging.critical(f"Server name is not correct, current name is full: {self.name}, short: {self.name.split('.')[0]}")
@@ -110,7 +111,8 @@ class Media_server():
 		return int(exec_vars["var"])
 
 	def check_running_backups(self) -> [True, False]:
-		r"""Connect to server, run eval $(locate bpps | sed -n '2 p') -a, parse with re.search(r"\s-backup\s", running_backups_raw)"""
+		r"""Connect to server, run eval $(locate bpps | sed -n '2 p') -a, parse with re.search(r"\s-backup\s", running_backups_raw)
+		And restores with re.search(r"\s-restore\s", running_backups_raw)"""
 		server_name = self.name
 
 		try:
@@ -121,7 +123,7 @@ class Media_server():
 			logging.error(f"from: check_running_backups()\nError while connecting to media server {server_name}, Error: {e}")
 			return True
 
-		return True if re.search(r"\s-backup\s", running_backups_raw) else False
+		return True if re.search(r"\s-backup\s", running_backups_raw) or re.search(r"\s-restore\s", running_backups_raw) else False
 
 	def release_swap(self) -> [None, str]:
 		"""Connect to server, stop Netbackup services, disable-enable swap, start Netbackup services"""
