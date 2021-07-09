@@ -18,10 +18,10 @@ daily_log_path = pathlib.Path.joinpath(daily_logs_folder_path,
 daily_logs_archive_folder_path = pathlib.Path.joinpath(pathlib.Path.cwd(),
                                                        "swap_release_daily_logs_archive")  # We keep daily log archives here, archiving runs each 10 days
 
-os.mkdir(f"{temp_logs_folder_path.__str__()}")
-os.mkdir(f"{daily_logs_folder_path.__str__()}")
-os.mkdir(f"{daily_logs_archive_folder_path.__str__()}")
-os.mkdir(f"{temp_logs_archive_folder_path.__str__()}")
+os.makedirs(f"{temp_logs_folder_path.__str__()}", exist_ok=True)
+os.makedirs(f"{daily_logs_folder_path.__str__()}", exist_ok=True)
+os.makedirs(f"{daily_logs_archive_folder_path.__str__()}", exist_ok=True)
+os.makedirs(f"{temp_logs_archive_folder_path.__str__()}", exist_ok=True)
 
 # ! logging to file
 logging.basicConfig(filename=f"{temp_logs_path.__str__()}", filemode="a", level=logging.DEBUG,
