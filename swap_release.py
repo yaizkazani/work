@@ -53,7 +53,7 @@ general_nb_processes = ["vnetd", "bpcd", "nbdisco", "nbrmms", "nbsl", "nbsvcmon"
 nb_msdp_processes = ["spad", "spoold"]  # processes that run only on media servers with MSDP connected
 
 
-class Media_server():
+class Media_server:
 	"""Class representing Netbackup Media Server"""
 
 	def __init__(self, name):
@@ -70,9 +70,6 @@ class Media_server():
 
 	def check_server_status(self) -> None:
 		"""Get self swap status, determine low swap and running backups conditions"""
-		server_name = self.name
-
-		# note Getting swap data from server
 
 		self.free_swap_space = self.get_media_server_data()
 
@@ -137,7 +134,7 @@ class Media_server():
 			return f"{e}"
 		return "OK"
 
-	def check_netbackup_processes(self, recursion = False) -> [list, None]:
+	def check_netbackup_processes(self, recursion=False) -> [list, None]:
 		"""Connect to server and check if all Netbackup processes are running
 		If not: try to start them, wait 5 second, make a recursive call to itself to check once more"""
 		server_name = self.name
@@ -162,7 +159,7 @@ class Media_server():
 			for process in nb_msdp_processes:
 				if not re.search(f"/{process}", nb_processes):
 					missing_nb_processes.append(process)
-		if recursion and "No missing processes found!" in missing_nb_processes: #nb to process recursive call since our list wont be empty and will have "No missing processes found!" in it
+		if recursion and "No missing processes found!" in missing_nb_processes:  # nb to process recursive call since our list wont be empty and will have "No missing processes found!" in it
 			missing_nb_processes = []
 
 		if missing_nb_processes:
@@ -251,7 +248,9 @@ def create_daily_log() -> None:
 def compress_temp_logs_move_to_archive() -> None:
 	"""Compress all temp logs and move them to archive. If successful - delete them"""
 	try:
-		subprocess.run(f"cd {temp_logs_folder_path} && tar -cf {temp_logs_archive_folder_path}{datetime.datetime.now().strftime('%d-%m')}.tar temp_log_*",
+		# subprocess.run(f"cd {temp_logs_folder_path} && tar -cf {temp_logs_archive_folder_path}/{datetime.datetime.now().strftime('%d-%m')}.tar temp_log_*",
+		#                shell=True)
+		subprocess.run(f"cd {temp_logs_folder_path} && tar -cf {pathlib.Path.joinpath(temp_logs_archive_folder_path, datetime.datetime.now().strftime('%d-%m')).__str__()}.tar temp_log_*",
 		               shell=True)
 		logging.info("from: compress_temp_logs_move_to_archive. Temp logs were compressed")
 	except Exception as e:
@@ -271,7 +270,9 @@ def compress_daily_logs_move_to_archive() -> None:
 	last_day_of_month = calendar.monthrange(now.year, now.month)[1]
 	if now.day % 10 == 0 or (now.month == 2 and now.day == last_day_of_month):  # Should also work on 28.02
 		try:
-			subprocess.run(f"cd {daily_logs_folder_path} && tar -cf {daily_logs_archive_folder_path}{now.strftime('%d-%m')}.tar daily_log_*",
+			# subprocess.run(f"cd {daily_logs_folder_path} && tar -cf {daily_logs_archive_folder_path}/{now.strftime('%d-%m')}.tar daily_log_*",
+			#                shell=True)
+			subprocess.run(f"cd {daily_logs_folder_path} && tar -cf {pathlib.Path.joinpath(daily_logs_archive_folder_path, now.strftime('%d-%m')).__str__()}.tar daily_log_*",
 			               shell=True)
 			logging.info("from: compress_daily_logs_move_to_archive. Daily logs were compressed")
 		except Exception as e:
