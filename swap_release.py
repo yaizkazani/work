@@ -236,13 +236,17 @@ def prepare_cron_jobs() -> None:
 def create_daily_log() -> None:
 	"""Read all temp logs, collect data, create daily log, put data into it"""
 	daily_log_data = []
-	for file in temp_logs_folder_path.glob("temp_log_*"):
-		daily_log_data.append(file.open(mode="r", encoding="utf8").readlines())
-	with open(daily_log_path, mode="w", encoding="utf8") as daily_log_file:
-		for log in daily_log_data:
-			daily_log_file.writelines(log)
-			daily_log_file.write("\n\n")
-	compress_temp_logs_move_to_archive()
+	try:
+		for file in temp_logs_folder_path.glob("temp_log_*"):
+			daily_log_data.append(file.open(mode="r", encoding="utf8").readlines())
+		with open(daily_log_path, mode="w", encoding="utf8") as daily_log_file:
+			for log in daily_log_data:
+				daily_log_file.writelines(log)
+				daily_log_file.write("\n\n")
+	except Exception as e:
+		logging.error(f"from: create_daily_log, error while creating daily log: {e}")
+	else:
+		compress_temp_logs_move_to_archive()
 
 
 def compress_temp_logs_move_to_archive() -> None:
