@@ -250,7 +250,7 @@ def compress_temp_logs_move_to_archive() -> None:
 	try:
 		# subprocess.run(f"cd {temp_logs_folder_path} && tar -cf {temp_logs_archive_folder_path}/{datetime.datetime.now().strftime('%d-%m')}.tar temp_log_*",
 		#                shell=True)
-		subprocess.run(f"cd {temp_logs_folder_path} && tar -cf {pathlib.Path.joinpath(temp_logs_archive_folder_path, datetime.datetime.now().strftime('%d-%m')).__str__()}.tar temp_log_*",
+		subprocess.run(f"cd {temp_logs_folder_path} && tar -cf {pathlib.Path.joinpath(temp_logs_archive_folder_path, datetime.datetime.now().strftime('%d-%m')).__str__()}_temp_logs.tar temp_log_*",
 		               shell=True)
 		logging.info("from: compress_temp_logs_move_to_archive. Temp logs were compressed")
 	except Exception as e:
@@ -272,7 +272,7 @@ def compress_daily_logs_move_to_archive() -> None:
 		try:
 			# subprocess.run(f"cd {daily_logs_folder_path} && tar -cf {daily_logs_archive_folder_path}/{now.strftime('%d-%m')}.tar daily_log_*",
 			#                shell=True)
-			subprocess.run(f"cd {daily_logs_folder_path} && tar -cf {pathlib.Path.joinpath(daily_logs_archive_folder_path, now.strftime('%d-%m')).__str__()}.tar daily_log_*",
+			subprocess.run(f"cd {daily_logs_folder_path} && tar -cf {pathlib.Path.joinpath(daily_logs_archive_folder_path, now.strftime('%d-%m')).__str__()}_daily_logs.tar daily_log_*",
 			               shell=True)
 			logging.info("from: compress_daily_logs_move_to_archive. Daily logs were compressed")
 		except Exception as e:
