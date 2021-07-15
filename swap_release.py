@@ -73,7 +73,7 @@ class Media_server:
 
 		self.free_swap_space = self.get_media_server_data()
 
-		if self.free_swap_space and 0 <= self.free_swap_space < 500:
+		if 0 <= self.free_swap_space < 500:
 			self.low_swap_condition = True
 		elif not self.free_swap_space:
 			logging.error(f"Error detected while getting parameters for media server: \n\tMedia server name: {self.name}, parameter: free_swap_space\n\tValue={self.free_swap_space}")
@@ -104,12 +104,12 @@ class Media_server:
 #		                                                                                             f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
 		data_processing_command = {"swap": r"var = ''.join([string.split()[3] for string in media_server_data.split('\n') if 'Swap' in string])"}.get(data_type,
 		                                                                                             f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
-		print("\nDebug:\n")
-		print(f"media_server_data = {media_server_data}")
-		split = media_server_data.split('\n')
-		print(f"media_server_data.split={split}")
-		strings = [string for string in split]
-		print(f"strings = {strings}")
+		# print("\nDebug:\n")
+		# print(f"media_server_data = {media_server_data}")
+		# split = media_server_data.split('\n')
+		# print(f"media_server_data.split={split}")
+		# strings = [string for string in split]
+		# print(f"strings = {strings}")
 
 		exec_vars = {}
 		exec(data_processing_command, locals(), exec_vars)
