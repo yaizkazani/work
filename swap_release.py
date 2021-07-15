@@ -102,8 +102,7 @@ class Media_server:
 
 #		data_processing_command = {"swap": r"var = media_server_data.split('\n')[3].split()[3]"}.get(data_type,
 #		                                                                                             f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
-		data_processing_command = {"swap": r"var = ''.join([string.split()[3] for string in media_server_data.split('\n') if 'Swap' in string])"}.get(data_type,
-		                                                                                             f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
+		data_processing_command = {"swap": r"var = ''.join([string.split()[3] for string in media_server_data.split('\n') if 'Swap' in string])"}[data_type]
 		# print("\nDebug:\n")
 		# print(f"media_server_data = {media_server_data}")
 		# split = media_server_data.split('\n')
@@ -112,7 +111,11 @@ class Media_server:
 		# print(f"strings = {strings}")
 
 		exec_vars = {}
-		exec(data_processing_command, locals(), exec_vars)
+
+		try:
+			exec(data_processing_command, locals(), exec_vars)
+		except Exception as e:
+			logging.error(f'logging.error("from: get_media_server_data()\nwhile running exec, error = {e}")')
 
 		return int(exec_vars["var"])
 
