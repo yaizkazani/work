@@ -108,19 +108,32 @@ class Media_server:
 		return int(exec_vars["var"])
 
 	def check_running_backups(self) -> [True, False]:
-		r"""Connect to server, run eval $(locate bpps | sed -n '2 p') -a, parse with re.search(r"\s-backup\s", running_backups_raw)
-		And restores with re.search(r"\s-restore\s", running_backups_raw)"""
+		r"""Connect to server, run eval /usr/openv/netbackup/bin/bpps -a, parse with re.search(r"\s-backup\s", running_backups_raw)
+		And restores with re.search(r"\s-restore\s", running_backups_raw), duplication with r"\s-dup\s" and  r"\s-copy\s" """
 		server_name = self.name
 
 		try:
-			getoutput_command = fr"ssh root@{server_name} eval $(locate bpps | sed -n '2 p') -a"
+			getoutput_command = fr"ssh root@{server_name} /usr/openv/netbackup/bin/bpps -a"
 			running_backups_raw = subprocess.getoutput(getoutput_command)
 
 		except Exception as e:
 			logging.error(f"from: check_running_backups()\nError while connecting to media server {server_name}, Error: {e}")
 			return True
 
-		return True if re.search(r"\s-backup\s", running_backups_raw) or re.search(r"\s-restore\s", running_backups_raw) else False
+		# return True if re.search(r"\s-backup\s", running_backups_raw) or \
+		#                re.search(r"\s-restore\s", running_backups_raw) or \
+		#                re.search(r"\s-dup\s", running_backups_raw) or \
+		#                re.search(r"\s-copy\s", running_backups_raw) else False
+		if re.search(r"\s-backup\s", running_backups_raw):
+			return "Backups are running"
+		elif re.search(r"\s-restore\s", running_backups_raw):
+			return "Restore is running"
+		elif re.search(r"\s-dup\s", running_backups_raw):
+			return "Duplication is running"
+		elif re.search(r"\s-copy\s", running_backups_raw):
+			return "Duplication (copy) is running"
+		else:
+			return False
 
 	def release_swap(self) -> [None, str]:
 		"""Connect to server, stop Netbackup services, disable-enable swap, start Netbackup services"""
@@ -140,7 +153,7 @@ class Media_server:
 		server_name = self.name
 
 		try:
-			nb_processes = subprocess.getoutput(f"ssh root@{server_name} eval $(locate bpps | sed -n '2 p') -a")
+			nb_processes = subprocess.getoutput(f"ssh root@{server_name} eval /usr/openv/netbackup/bin/bpps -a")
 			logging.info(f"Got processes from {server_name}")
 		except Exception as e:
 			logging.error(f"from: check_netbackup_processes()\n{e}")
@@ -185,7 +198,7 @@ class Media_server:
 
 def get_media_server_list() -> list:
 	"""Read bp.conf, extract media server list, filter it and return as list, must be run on master server"""
-	media_server_list = subprocess.getoutput(r"cat exec $(locate bp.conf | sed -n '1 p') | egrep '^MEDIA_SERVER'")
+	media_server_list = subprocess.getoutput(r"cat /usr/openv/netbackup/bp.conf | egrep '^MEDIA_SERVER'")
 	filtered_media_server_list = [item.split("=")[1].strip() for item in media_server_list.split("\n") if "MEDIA_SERVER" in item]
 	if not filtered_media_server_list:
 		logging.critical("from: get_media_server_list()\nMedia server list is empty")
@@ -254,8 +267,9 @@ def compress_temp_logs_move_to_archive() -> None:
 	try:
 		# subprocess.run(f"cd {temp_logs_folder_path} && tar -cf {temp_logs_archive_folder_path}/{datetime.datetime.now().strftime('%d-%m')}.tar temp_log_*",
 		#                shell=True)
-		subprocess.run(f"cd {temp_logs_folder_path} && tar -cf {pathlib.Path.joinpath(temp_logs_archive_folder_path, datetime.datetime.now().strftime('%d-%m')).__str__()}_temp_logs.tar temp_log_*",
-		               shell=True)
+		subprocess.run(
+			f"cd {temp_logs_folder_path} && tar -cf {pathlib.Path.joinpath(temp_logs_archive_folder_path, datetime.datetime.now().strftime('%d-%m')).__str__()}_temp_logs.tar temp_log_*",
+			shell=True)
 		logging.info("from: compress_temp_logs_move_to_archive. Temp logs were compressed")
 	except Exception as e:
 		logging.error(f"from: compress_temp_logs_move_to_archive (compress), error: {e}")
@@ -276,8 +290,9 @@ def compress_daily_logs_move_to_archive() -> None:
 		try:
 			# subprocess.run(f"cd {daily_logs_folder_path} && tar -cf {daily_logs_archive_folder_path}/{now.strftime('%d-%m')}.tar daily_log_*",
 			#                shell=True)
-			subprocess.run(f"cd {daily_logs_folder_path} && tar -cf {pathlib.Path.joinpath(daily_logs_archive_folder_path, now.strftime('%d-%m')).__str__()}_daily_logs.tar daily_log_*",
-			               shell=True)
+			subprocess.run(
+				f"cd {daily_logs_folder_path} && tar -cf {pathlib.Path.joinpath(daily_logs_archive_folder_path, now.strftime('%d-%m')).__str__()}_daily_logs.tar daily_log_*",
+				shell=True)
 			logging.info("from: compress_daily_logs_move_to_archive. Daily logs were compressed")
 		except Exception as e:
 			logging.error(f"from: compress_daily_logs_move_to_archive (compress), error: {e}")
@@ -323,7 +338,9 @@ prepare_cron_jobs()
 media_server_names = get_media_server_list()
 media_servers = []
 
-[media_servers.append(Media_server(name=media_server_name)) for media_server_name in media_server_names]
+[media_servers.append(Media_server(name=media_server_name)) for media_server_name in media_server_names if
+ (media_server_name.split(".")[0] in media_servers_with_MSDP or media_server_name in media_servers_with_MSDP)]
+# We are checking both long and short name to be present in media server list.
 
 # nb hourly swap check
 for media_server_exemplar in media_servers:
