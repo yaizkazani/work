@@ -100,15 +100,9 @@ class Media_server:
 			logging.error(f"from: get_media_server_data()\nError while connecting to media server {media_server}, Error: {e}")
 			return None
 
-#		data_processing_command = {"swap": r"var = media_server_data.split('\n')[3].split()[3]"}.get(data_type,
-#		                                                                                             f'logging.error("from: get_media_server_data()\ndata_processing_command not found: {data_type}")')
+
 		data_processing_command = {"swap": r"var = ''.join([string.split()[3] for string in media_server_data.split('\n') if 'Swap' in string])"}[data_type]
-		# print("\nDebug:\n")
-		# print(f"media_server_data = {media_server_data}")
-		# split = media_server_data.split('\n')
-		# print(f"media_server_data.split={split}")
-		# strings = [string for string in split]
-		# print(f"strings = {strings}")
+
 
 		exec_vars = {}
 
@@ -132,10 +126,6 @@ class Media_server:
 			logging.error(f"from: check_running_backups()\nError while connecting to media server {server_name}, Error: {e}")
 			return True
 
-		# return True if re.search(r"\s-backup\s", running_backups_raw) or \
-		#                re.search(r"\s-restore\s", running_backups_raw) or \
-		#                re.search(r"\s-dup\s", running_backups_raw) or \
-		#                re.search(r"\s-copy\s", running_backups_raw) else False
 		if re.search(r"\s-backup\s", running_backups_raw):
 			return "Backups are running"
 		elif re.search(r"\s-restore\s", running_backups_raw):
